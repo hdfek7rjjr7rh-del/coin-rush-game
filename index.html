@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coin Rush Game</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js?63"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #101828, #1d2939);
+      color: white;
+      text-align: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      padding: 25px 18px;
+    }
+
+    h1 {
+      margin-top: 10px;
+      font-size: 30px;
+    }
+
+    .balance {
+      margin: 25px auto;
+      padding: 20px;
+      max-width: 350px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 20px;
+    }
+
+    .coins {
+      font-size: 42px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    .coin-button {
+      width: 190px;
+      height: 190px;
+      border-radius: 50%;
+      border: none;
+      background: #f5b700;
+      font-size: 55px;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(245,183,0,0.35);
+      transition: transform 0.1s;
+    }
+
+    .coin-button:active {
+      transform: scale(0.92);
+    }
+
+    .info {
+      margin-top: 20px;
+      color: #cbd5e1;
+    }
+
+    .referral {
+      margin-top: 25px;
+      padding: 15px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 15px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>🪙 Coin Rush</h1>
+
+    <div class="balance">
+      <div>Your Coins</div>
+      <div class="coins" id="coins">0</div>
+    </div>
+
+    <button class="coin-button" id="tapButton">🪙</button>
+
+    <div class="info">
+      Tap the coin to earn!
+    </div>
+
+    <div class="referral">
+      👥 Referral system coming soon
+    </div>
+
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+
+    tg.ready();
+    tg.expand();
+
+    let coins = Number(localStorage.getItem("coins")) || 0;
+
+    const coinsElement = document.getElementById("coins");
+    const tapButton = document.getElementById("tapButton");
+
+    function updateCoins() {
+      coinsElement.textContent = coins;
+      localStorage.setItem("coins", coins);
+    }
+
+    tapButton.addEventListener("click", function () {
+      coins += 1;
+      updateCoins();
+
+      if (tg.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred("light");
+      }
+    });
+
+    updateCoins();
+  </script>
+
+</body>
+</html>
