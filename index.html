@@ -15,61 +15,51 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #101828, #1d2939);
+      background: linear-gradient(135deg, #111827, #1e3a8a);
       color: white;
       text-align: center;
       min-height: 100vh;
     }
 
     .container {
-      padding: 25px 18px;
+      padding: 30px 20px;
     }
 
     h1 {
-      margin-top: 10px;
-      font-size: 30px;
+      font-size: 32px;
+      margin-bottom: 10px;
     }
 
-    .balance {
-      margin: 25px auto;
-      padding: 20px;
-      max-width: 350px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 20px;
+    .user {
+      margin-bottom: 25px;
+      opacity: 0.9;
     }
 
     .coins {
       font-size: 42px;
       font-weight: bold;
-      margin-top: 8px;
+      margin: 30px 0;
     }
 
-    .coin-button {
-      width: 190px;
-      height: 190px;
-      border-radius: 50%;
+    button {
       border: none;
-      background: #f5b700;
-      font-size: 55px;
+      border-radius: 20px;
+      padding: 20px 40px;
+      font-size: 24px;
+      font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 10px 30px rgba(245,183,0,0.35);
-      transition: transform 0.1s;
+      background: #facc15;
+      color: #111827;
     }
 
-    .coin-button:active {
-      transform: scale(0.92);
+    button:active {
+      transform: scale(0.95);
     }
 
-    .info {
-      margin-top: 20px;
-      color: #cbd5e1;
-    }
-
-    .referral {
+    .status {
       margin-top: 25px;
-      padding: 15px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 15px;
+      font-size: 14px;
+      opacity: 0.85;
     }
   </style>
 </head>
@@ -77,24 +67,19 @@
 <body>
 
   <div class="container">
-
     <h1>🪙 Coin Rush</h1>
 
-    <div class="balance">
-      <div>Your Coins</div>
-      <div class="coins" id="coins">0</div>
+    <div class="user" id="user">Connecting...</div>
+
+    <div class="coins">
+      🪙 <span id="coins">0</span>
     </div>
 
-    <button class="coin-button" id="tapButton">🪙</button>
+    <button id="tapButton">TAP +1</button>
 
-    <div class="info">
-      Tap the coin to earn!
+    <div class="status" id="status">
+      Connecting your Telegram account...
     </div>
-
-    <div class="referral">
-      👥 Referral system coming soon
-    </div>
-
   </div>
 
   <script>
@@ -103,26 +88,68 @@
     tg.ready();
     tg.expand();
 
-    let coins = Number(localStorage.getItem("coins")) || 0;
-
     const coinsElement = document.getElementById("coins");
+    const userElement = document.getElementById("user");
+    const statusElement = document.getElementById("status");
     const tapButton = document.getElementById("tapButton");
 
-    function updateCoins() {
-      coinsElement.textContent = coins;
-      localStorage.setItem("coins", coins);
+    let coins = Number(localStorage.getItem("coins")) || 0;
+
+    coinsElement.textContent = coins;
+
+    const telegramUser = tg.initDataUnsafe?.user;
+
+    if (telegramUser) {
+      userElement.textContent =
+        "👤 " + (telegramUser.first_name || "Player");
+    } else {
+      userElement.textContent = "👤 Telegram Player";
     }
+
+    async function connectUser() {
+      try {
+        const response = await fetch(
+          "https://tzexlawaafxjuwbewrab.supabase.co/functions/v1/telegram-user",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              initData: tg.initData
+            })
+          }
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+          statusElement.textContent = "✅ Telegram account connected";
+        } else {
+          statusElement.textContent =
+            "⚠️ Account connection failed";
+          console.log(data);
+        }
+
+      } catch (error) {
+        statusElement.textContent =
+          "⚠️ Connection error";
+        console.log(error);
+      }
+    }
+
+    connectUser();
 
     tapButton.addEventListener("click", function () {
       coins += 1;
-      updateCoins();
+      coinsElement.textContent = coins;
+
+      localStorage.setItem("coins", coins);
 
       if (tg.HapticFeedback) {
         tg.HapticFeedback.impactOccurred("light");
       }
     });
-
-    updateCoins();
   </script>
 
 </body>
